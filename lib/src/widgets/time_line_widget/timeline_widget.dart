@@ -84,7 +84,7 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
   void initState() {
     super.initState();
     _controller = ScrollController(
-      initialScrollOffset: _calculateDateOffset(currentDate) - (MediaQuery.of(context).size.width - _dayOffsetConstrains) / 2.09,
+      initialScrollOffset: _calculateDateOffset(widget.initialDate) - (MediaQuery.of(context).size.width - _dayOffsetConstrains) / 2.09,
     );
   }
 
