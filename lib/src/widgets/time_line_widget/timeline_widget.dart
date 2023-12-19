@@ -85,9 +85,12 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
   @override
   void initState() {
     super.initState();
+    _controller = ScrollController();
     Timer(const Duration(milliseconds: 100), () {
-      _controller = ScrollController(
-        initialScrollOffset: _calculateDateOffset(widget.initialDate) - (MediaQuery.of(context).size.width - _dayOffsetConstrains) / 2.09,
+      _controller.animateTo(
+        _calculateDateOffset(widget.initialDate) - (MediaQuery.of(context).size.width - _dayOffsetConstrains) / 2.09,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.decelerate,
       );
     });
   }
