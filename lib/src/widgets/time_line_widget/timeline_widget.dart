@@ -13,18 +13,16 @@ class TimeLineWidget extends StatefulWidget {
     required this.focusedDate,
     required this.activeDayTextColor,
     required this.activeDayColor,
+    this.autoCenter = true,
     this.inactiveDates,
     this.dayProps = const EasyDayProps(),
     this.locale = "en_US",
     this.timeLineProps = const EasyTimeLineProps(),
     this.onDateChange,
     this.itemBuilder,
-  })  : assert(timeLineProps.hPadding > -1,
-            "Can't set timeline hPadding less than zero."),
-        assert(timeLineProps.separatorPadding > -1,
-            "Can't set timeline separatorPadding less than zero."),
-        assert(timeLineProps.vPadding > -1,
-            "Can't set timeline vPadding less than zero.");
+  })  : assert(timeLineProps.hPadding > -1, "Can't set timeline hPadding less than zero."),
+        assert(timeLineProps.separatorPadding > -1, "Can't set timeline separatorPadding less than zero."),
+        assert(timeLineProps.vPadding > -1, "Can't set timeline vPadding less than zero.");
 
   /// Represents the initial date for the timeline widget.
   /// This is the date that will be displayed as the first day in the timeline.
@@ -38,6 +36,11 @@ class TimeLineWidget extends StatefulWidget {
 
   /// The background color of the selected day.
   final Color activeDayColor;
+
+  /// Automatically centers the selected day in the timeline.
+  /// If set to `true`, the timeline will automatically scroll to center the selected day.
+  /// If set to `false`, the timeline will not scroll when the selected day changes.
+  final bool autoCenter;
 
   /// Represents a list of inactive dates for the timeline widget.
   /// Note that all the dates defined in the inactiveDates list will be deactivated.
@@ -70,13 +73,19 @@ class TimeLineWidget extends StatefulWidget {
 
 class _TimeLineWidgetState extends State<TimeLineWidget> {
   EasyDayProps get _dayProps => widget.dayProps;
+
   EasyTimeLineProps get _timeLineProps => widget.timeLineProps;
+
   bool get _isLandscapeMode => _dayProps.landScapeMode;
+
   double get _dayWidth => _dayProps.width;
+
   double get _dayHeight => _dayProps.height;
+
   double get _dayOffsetConstrains => _isLandscapeMode ? _dayHeight : _dayWidth;
 
   late ScrollController _controller;
+
   @override
   void initState() {
     super.initState();
@@ -101,16 +110,11 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
   double _calculateDateOffset(DateTime date) {
     final startDate = DateTime(date.year, date.month, 1);
     int offset = date.difference(startDate).inDays;
-    double adjustedHPadding =
-        _timeLineProps.hPadding > EasyConstants.timelinePadding
-            ? (_timeLineProps.hPadding - EasyConstants.timelinePadding)
-            : 0.0;
+    double adjustedHPadding = _timeLineProps.hPadding > EasyConstants.timelinePadding ? (_timeLineProps.hPadding - EasyConstants.timelinePadding) : 0.0;
     if (offset == 0) {
       return 0.0;
     }
-    return (offset * _dayOffsetConstrains) +
-        (offset * _timeLineProps.separatorPadding) +
-        adjustedHPadding;
+    return (offset * _dayOffsetConstrains) + (offset * _timeLineProps.separatorPadding) + adjustedHPadding;
   }
 
   @override
@@ -120,13 +124,10 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
     return Container(
       height: _isLandscapeMode ? _dayWidth : _dayHeight,
       margin: _timeLineProps.margin,
-      color: _timeLineProps.decoration == null
-          ? _timeLineProps.backgroundColor
-          : null,
+      color: _timeLineProps.decoration == null ? _timeLineProps.backgroundColor : null,
       decoration: _timeLineProps.decoration,
       child: ClipRRect(
-        borderRadius:
-            _timeLineProps.decoration?.borderRadius ?? BorderRadius.zero,
+        borderRadius: _timeLineProps.decoration?.borderRadius ?? BorderRadius.zero,
         child: ListView.separated(
           controller: _controller,
           scrollDirection: Axis.horizontal,
@@ -135,12 +136,9 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
             vertical: _timeLineProps.vPadding,
           ),
           itemBuilder: (context, index) {
-            final currentDate =
-                DateTime(initialDate.year, initialDate.month, index + 1);
+            final currentDate = DateTime(initialDate.year, initialDate.month, index + 1);
 
-            final isSelected = widget.focusedDate != null
-                ? EasyDateUtils.isSameDay(widget.focusedDate!, currentDate)
-                : EasyDateUtils.isSameDay(widget.initialDate, currentDate);
+            final isSelected = widget.focusedDate != null ? EasyDateUtils.isSameDay(widget.focusedDate!, currentDate) : EasyDateUtils.isSameDay(widget.initialDate, currentDate);
 
             bool isDisabledDay = false;
             // Check if this date should be deactivated only for the DeactivatedDates.
@@ -202,5 +200,12 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
   void _onDayChanged(bool isSelected, DateTime currentDate) {
     // A date is selected
     widget.onDateChange?.call(currentDate);
+    // Mantain the selected day in the center of the timeline
+    if (widget.autoCenter)
+      _controller.animateTo(
+        _calculateDateOffset(currentDate) - (MediaQuery.of(context).size.width - _dayOffsetConstrains) / 2.09,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.decelerate,
+      );
   }
 }
