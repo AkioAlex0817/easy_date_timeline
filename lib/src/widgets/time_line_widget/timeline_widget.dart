@@ -13,7 +13,6 @@ class TimeLineWidget extends StatefulWidget {
     required this.focusedDate,
     required this.activeDayTextColor,
     required this.activeDayColor,
-    this.autoCenter = true,
     this.inactiveDates,
     this.dayProps = const EasyDayProps(),
     this.locale = "en_US",
@@ -36,11 +35,6 @@ class TimeLineWidget extends StatefulWidget {
 
   /// The background color of the selected day.
   final Color activeDayColor;
-
-  /// Automatically centers the selected day in the timeline.
-  /// If set to `true`, the timeline will automatically scroll to center the selected day.
-  /// If set to `false`, the timeline will not scroll when the selected day changes.
-  final bool autoCenter;
 
   /// Represents a list of inactive dates for the timeline widget.
   /// Note that all the dates defined in the inactiveDates list will be deactivated.
@@ -90,7 +84,7 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
   void initState() {
     super.initState();
     _controller = ScrollController(
-      initialScrollOffset: _calculateDateOffset(widget.initialDate),
+      initialScrollOffset: _calculateDateOffset(currentDate) - (MediaQuery.of(context).size.width - _dayOffsetConstrains) / 2.09,
     );
   }
 
@@ -200,12 +194,5 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
   void _onDayChanged(bool isSelected, DateTime currentDate) {
     // A date is selected
     widget.onDateChange?.call(currentDate);
-    // Mantain the selected day in the center of the timeline
-    if (widget.autoCenter)
-      _controller.animateTo(
-        _calculateDateOffset(currentDate) - (MediaQuery.of(context).size.width - _dayOffsetConstrains) / 2.09,
-        duration: Duration(milliseconds: 500),
-        curve: Curves.decelerate,
-      );
   }
 }
