@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../properties/easy_day_props.dart';
@@ -83,9 +85,11 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
   @override
   void initState() {
     super.initState();
-    _controller = ScrollController(
-      initialScrollOffset: _calculateDateOffset(widget.initialDate) - (MediaQuery.of(context).size.width - _dayOffsetConstrains) / 2.09,
-    );
+    Timer(const Duration(milliseconds: 100), () {
+      _controller = ScrollController(
+        initialScrollOffset: _calculateDateOffset(widget.initialDate) - (MediaQuery.of(context).size.width - _dayOffsetConstrains) / 2.09,
+      );
+    });
   }
 
   @override
